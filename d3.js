@@ -1698,9 +1698,8 @@
     return v < 16 ? "0" + Math.max(0, v).toString(16) : Math.min(255, v).toString(16);
   }
   function d3_rgb_parse(format, rgb, hsl) {
-    format = format.toLowerCase();
     var r = 0, g = 0, b = 0, m1, m2, color;
-    m1 = /([a-z]+)\((.*)\)/.exec(format);
+    m1 = /([a-z]+)\((.*)\)/.exec(format = format.toLowerCase());
     if (m1) {
       m2 = m1[2].split(",");
       switch (m1[1]) {
@@ -2631,11 +2630,24 @@
       p: function(d) {
         return locale_periods[+(d.getHours() >= 12)];
       },
+      Q: function(d, p) {
+        return 'Q' + d3_time_formatPad(Math.floor(d.getMonth() / 3) + 1, p, 2);
+      },
       S: function(d, p) {
         return d3_time_formatPad(d.getSeconds(), p, 2);
       },
       U: function(d, p) {
         return d3_time_formatPad(d3_time.sundayOfYear(d), p, 2);
+      },
+      V: function(d, p) {
+        // Set to nearest Thursday: current date + 4 - current day number, make Sunday's day number 7
+        var date = new Date(d);
+        date.setDate(date.getDate() + 4 - (date.getDay() || 7));
+        // Get first day of year
+        var firstDayYear = new Date(date.getFullYear(), 0, 1);
+        // Calculate full weeks to nearest Thursday
+        var weekNumber = Math.ceil((((date - firstDayYear) / 86400000) + 1) / 7);
+        return d3_time_formatPad(weekNumber, p, 2);
       },
       w: function(d) {
         return d.getDay();
